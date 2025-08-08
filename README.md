@@ -84,6 +84,8 @@ echo 'export PATH=$HOME/riscv_toolchain/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-
 ```bash
 sudo apt-get install -y device-tree-compiler
 ```
+<img width="755" height="131" alt="Screenshot from 2025-08-02 21-55-57" src="https://github.com/user-attachments/assets/f98096dc-45b7-4447-9f04-697dfb72bf95" />
+
 ### Task 6 — Build and Install Spike (ISA Simulator)
 
 ```bash
@@ -96,9 +98,132 @@ sudo make install
 ```
 
 
+### Task 7 — Build and Install Proxy Kernel
 
+```bash
+cd $pwd/riscv_toolchain
+git clone https://github.com/riscv/riscv-pk.git
+cd riscv-pk
+mkdir -p build && cd build
+../configure --prefix=$pwd/riscv_toolchain/riscv64-unknown-elf-gcc8.3.0-2019.08.0-x86_64-linux-ubuntu14 --host=riscv64-unknown-elf
+make -j$(nproc)
+sudo make install
+```
 
+### Task 8 — Add Cross Bin Directory to PATH
 
+**Current shell:**
+
+```bash
+export PATH=$pwd/riscv_toolchain/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14/riscv64-unknown-elf/bin:$PATH
+```
+
+**Persistent:**
+
+```bash
+echo 'export PATH=$HOME/riscv_toolchain/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14/riscv64-unknown-elf/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
+```
+## Task 9 — (Optional) Install Icarus Verilog
+
+```bash
+cd $pwd/riscv_toolchain
+git clone https://github.com/steveicarus/iverilog.git
+cd iverilog
+git checkout --track -b v10-branch origin/v10-branch
+git pull
+chmod +x autoconf.sh
+./autoconf.sh
+./configure
+make -j$(nproc)
+sudo make install
+```
+
+### Task 10 — Sanity Checks
+
+```bash
+which riscv64-unknown-elf-gcc
+riscv64-unknown-elf-gcc -v
+which spike
+spike --version
+which pk
+```
+<img width="1851" height="424" alt="image" src="https://github.com/user-attachments/assets/664d99f5-9bdd-4f70-bb84-f85fe8fecd3e" />
+
+## Final Deliverable: Unique C Test
+
+### 1. Create `unique_test.c`
+```c
+#include <stdint.h>
+#include <stdio.h>
+
+#ifndef USERNAME
+#define USERNAME "unknown_user"
+#endif
+
+#ifndef HOSTNAME
+#define HOSTNAME "unknown_host"
+#endif
+
+// 64-bit FNV-1a
+static uint64_t fnv1a64(const char *s) {
+    const uint64_t FNV_OFFSET = 1469598103934665603ULL;
+    const uint64_t FNV_PRIME = 1099511628211ULL;
+    uint64_t h = FNV_OFFSET;
+    for (const unsigned char *p = (const unsigned char*)s; *p; ++p) {
+        h ^= (uint64_t)(*p);
+        h *= FNV_PRIME;
+    }
+    return h;
+}
+
+int main(void) {
+    const char *user = USERNAME;
+    const char *host = HOSTNAME;
+    char buf[256];
+    int n = snprintf(buf, sizeof(buf), "%s@%s", user, host);
+    if (n <= 0) return 1;
+    uint64_t uid = fnv1a64(buf);
+    printf("RISC-V Uniqueness Check\n");
+    printf("User: %s\n", user);
+    printf("Host: %s\n", host);
+    printf("UniqueID: 0x%016llx\n", (unsigned long long)uid);
+#ifdef __VERSION__
+    unsigned long long vlen = (unsigned long long)sizeof(__VERSION__) - 1;
+    printf("GCC_VLEN: %llu\n", vlen);
+#endif
+    return 0;
+}
+```
+
+### 2. Compile with Injected Identity
+
+```bash
+echo "Username: '$(id -un)'"
+echo "Hostname: '$(hostname -s)'"
+```
+
+```bash
+riscv64-unknown-elf-gcc -O2 -Wall -march=rv64imac -mabi=lp64 \
+-DUSERNAME='"hitanshu"' -DHOSTNAME='"hitanshu-VirtualBox"' \
+unique_test.c -o unique_test
+```
+
+### 3. Run on Spike + Proxy Kernel
+
+```bash
+spike pk ./unique_test
+```
+---
+**Output**:-
+
+<img width="930" height="206" alt="Screenshot from 2025-08-02 21-42-00" src="https://github.com/user-attachments/assets/215d3a6a-74d1-4162-a90e-675b570843ef" />
+
+## Conclusion
+
+This task offered a comprehensive, hands-on introduction to the bare-metal RISC-V development workflow. It involved setting up the necessary toolchain, writing and compiling C programs targeted for the RISC-V architecture, and running them using an ISA-level simulator. Each of these steps was performed on an Ubuntu system, which provided an ideal open-source environment for low-level hardware and software experimentation. Through this process, I gained practical experience with essential components of the RISC-V ecosystem — including compiler toolchains, simulators, and debugging utilities.
+
+Completing this initial setup significantly deepened my understanding of open-source hardware development, as well as the intricacies of low-level Linux-based toolchains. Moreover, this foundational knowledge lays the groundwork for more advanced stages of the lab, such as Register Transfer Level (RTL) simulation, digital logic synthesis, and the design and integration of complete System-on-Chip (SoC) architectures.
 
 
 
