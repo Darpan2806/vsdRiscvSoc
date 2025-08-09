@@ -1,0 +1,6 @@
+bbl loader
+RISC-V Uniqueness Check
+User: darpan
+Host: UBUNTU
+UniqueID: 0xad60972427434ab8
+GCC_VLEN: 5
