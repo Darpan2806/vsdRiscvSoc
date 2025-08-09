@@ -205,7 +205,7 @@ echo "Hostname: '$(hostname -s)'"
 
 ```bash
 riscv64-unknown-elf-gcc -O2 -Wall -march=rv64imac -mabi=lp64 \
--DUSERNAME='"farpan"' -DHOSTNAME='"UBUNTU"' \
+-DUSERNAME='"darpan"' -DHOSTNAME='"UBUNTU"' \
 unique_test.c -o unique_test
 ```
 
