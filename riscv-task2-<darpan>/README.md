@@ -13,7 +13,8 @@
 ## Toolchain Verification
 
 ### Spike Version and riscv64-unknown-elf-gcc -v (both in the same screenshot)
-<img width="1849" height="939" alt="Screenshot from 2025-08-09 11-29-40" src="https://github.com/user-attachments/assets/a0a98f9c-0097-489d-8f9d-5fd2a80b677c" />
+<img width="1851" height="424" alt="Screenshot from 2025-08-08 16-22-08" src="https://github.com/user-attachments/assets/5da90765-bb54-4841-89e6-ad3c90c4ca8b" />
+
 
 ## Output
 ### Compile Commands: -
